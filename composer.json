@@ -1,0 +1,20 @@
+{
+  "name": "mrcat29/sugar-crm-wrapper",
+  "description": "Sugar Crm Wrapper or Suite Crm Wrapper",
+  "type": "package",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "freddy vargas",
+      "email": "freddy@blinsoft.com"
+    }
+  ],
+  "require": {
+    "guzzlehttp/guzzle": "^6.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "MrCat\\SugarCrmWrapper\\": "src/mrcat"
+    }
+  }
+}
