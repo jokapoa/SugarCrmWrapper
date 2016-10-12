@@ -75,7 +75,7 @@ class Helpers
             if (is_array($data[$i])) {
                 foreach ($data[$i] as $key => $value) {
                     $return[$i][] = [
-                        'name' => $key,
+                        'name'  => $key,
                         'value' => $this->replaceOptionsMultipleString($value),
                     ];
                 }
@@ -95,16 +95,15 @@ class Helpers
     public function requestValueRelations(array $options = [])
     {
         $return = [];
-        if (array_key_exists('link_name_to_fields_array', $options)) {
-            foreach ($options['link_name_to_fields_array'] as $key) {
-                foreach ($key as $i => $value) {
-                    $return[] = [
-                        'name' => $i,
-                        'value' => $value
-                    ];
-                }
+        foreach ($options as $key) {
+            foreach ($key as $i => $value) {
+                $return[] = [
+                    'name'  => $i,
+                    'value' => $value,
+                ];
             }
         }
+
         return $return;
     }
 
@@ -121,7 +120,7 @@ class Helpers
         $return = [];
         foreach ($data as $key => $value) {
             $return[] = [
-                'name' => $key,
+                'name'  => $key,
                 'value' => $this->replaceOptionsMultipleString($value),
             ];
         }

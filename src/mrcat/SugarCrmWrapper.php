@@ -43,40 +43,38 @@ class SugarCrmWrapper
      * Un usuario inicia sesión en la aplicación de sugar crm.
      *
      * @param array $credentials
-     *
+     * <pre>
+     *      [
+     *          'username' => 'xxxxxx',
+     *           'password' => 'xxxxxx',
+     *      ]
+     * </pre>
      * @return boolean
      */
     public function login(array $credentials = [])
     {
-        //validando las credenciales.
         if ($this->validateCredentials($credentials)) {
-            // formulario para la autenticacion a la api del sugarcrm.
             $this->setFormParams([
-                'user_auth' => [
+                'user_auth'       => [
                     'user_name' => $credentials['username'],
-                    'password' => md5($credentials['password']),
+                    'password'  => md5($credentials['password']),
                 ],
                 'name_value_list' => [
                     [
-                        'name' => 'notifyonsave',
+                        'name'  => 'notifyonsave',
                         'value' => 'true',
                     ],
                 ],
             ]);
 
-            // enviado la peticion del metodo login al sugar crm con sus parametros..
             $request = Request::send('login', $this->parameters);
 
-            // validando los errores de la solicitud.
             $this->validateErrors($request);
 
-            // setea un nuevo valor para la session.
             $this->setSession($request['id']);
 
-            // transformando los valores de la respuesta de los metodos de la aplicacion.
             $request = $this->transformResponseValues($request['name_value_list']);
 
-            //setea un nuevo valor para el usuario que se encuentra en session.
             $this->setId($request['user_id']);
 
             return true;
@@ -94,15 +92,12 @@ class SugarCrmWrapper
      */
     public function oauthAccess($sesion)
     {
-        // formulario para la solicitud del metodo oauth_access
         $this->setFormParams([
             'session' => $sesion,
         ]);
 
-        // enviado la peticion del metodo oauth_access al sugar crm con sus parametros..
         $request = Request::send('oauth_access', $this->parameters);
 
-        // validando los errores de la solicitud.
         $this->validateErrors($request);
 
         return $request;
@@ -115,15 +110,12 @@ class SugarCrmWrapper
      */
     public function getUserId()
     {
-        // formulario para la solicitud del metodo get_user_id
         $this->setFormParams([
             'session' => $this->getSession(),
         ]);
 
-        // enviado la peticion del metodo logout al sugar crm con sus parametros..
         $request = Request::send('get_user_id', $this->parameters);
 
-        //setea un nuevo valor para el usuario que se encuentra en session.
         $this->setId($request);
 
         return $request;
@@ -136,18 +128,14 @@ class SugarCrmWrapper
      */
     public function logout()
     {
-        // formulario para la solicitud del metodo logout
         $this->setFormParams([
             'session' => $this->getSession(),
         ]);
 
-        // enviado la peticion del metodo logout al sugar crm con sus parametros..
         $request = Request::send('logout', $this->parameters);
 
-        // validando los errores de la solicitud.
         $this->validateErrors($request);
 
-        // setea un nuevo valor para la session.
         $this->setSession(null);
 
         return $this;
@@ -162,16 +150,13 @@ class SugarCrmWrapper
      */
     public function getModuleFields($module)
     {
-        // formulario para la solicitud del metodo get_module_fields
         $this->setFormParams([
-            'session' => $this->getSession(),
+            'session'     => $this->getSession(),
             'module_name' => $module,
         ]);
 
-        // enviado la peticion del metodo get_module_fields al sugar crm con sus parametros..
         $request = Request::send('get_module_fields', $this->parameters);
 
-        // validando los errores de la solicitud.
         $this->validateErrors($request);
 
         return $request;
@@ -184,15 +169,12 @@ class SugarCrmWrapper
      */
     public function getAvaliableModules()
     {
-        // formulario para la solicitud del metodo get_available_modules
         $this->setFormParams([
             'session' => $this->getSession(),
         ]);
 
-        // enviado la peticion del metodo get_available_modules al sugar crm con sus parametros..
         $request = Request::send('get_available_modules', $this->parameters);
 
-        // validando los errores de la solicitud.
         $this->validateErrors($request);
 
         return $request;
@@ -203,31 +185,26 @@ class SugarCrmWrapper
      *
      * @param string $module
      * @param string $id
-     * @param array $options
+     * @param array  $options
      *
      * @return array
      */
     public function getEntry($module, $id, $options = [])
     {
-        // Validando las opciones del metodo
         $options = $this->validateOptionsMethodGetEntry($options);
 
-        // formulario para la solicitud del metodo get_entry
         $this->setFormParams([
-            'session' => $this->getSession(),
-            'module_name' => $module,
-            'id' => $id,
-            'select_fields' => $options['select_fields'],
+            'session'                   => $this->getSession(),
+            'module_name'               => $module,
+            'id'                        => $id,
+            'select_fields'             => $options['select_fields'],
             'link_name_to_fields_array' => $options['link_name_to_fields_array'],
         ]);
 
-        // enviado la peticion del metodo logout al sugar crm con sus parametros..
         $request = Request::send('get_entry', $this->parameters);
 
-        // validando los errores de la solicitud.
         $this->validateErrors($request);
 
-        // transformando los valores de la respuesta de los metodos de la aplicacion.
         $request = $this->transformResponse($request);
 
         return $request[0];
@@ -237,7 +214,7 @@ class SugarCrmWrapper
      * Creando o actualizando un registro.
      *
      * @param string $module
-     * @param array $data
+     * @param array  $data
      *
      * @return mixed
      *
@@ -245,98 +222,174 @@ class SugarCrmWrapper
      */
     public function setEntry($module, array $data = [])
     {
-        // formulario para la solicitud del metodo set_entry
+        $nameValueList = $this->helpers()->requestValue($data);
+
         $this->setFormParams([
-            'session' => $this->getSession(),
-            'module_name' => $module,
-            'name_value_list' => $this->helpers()->requestValue($data),
+            'session'         => $this->getSession(),
+            'module_name'     => $module,
+            'name_value_list' => $nameValueList,
         ]);
 
-        // enviado la peticion del metodo set_entry al sugar crm con sus parametros..
         $request = Request::send('set_entry', $this->parameters);
 
-        // validando los errores de la solicitud.
         $this->validateErrors($request);
 
         return $request['id'];
     }
 
     /**
-     * Retrieves a list of beans based on query specifications.
+     * Recupera una lista de registros en base a las especificaciones de la consulta.
      *
      * @param string $module
-     * @param array $options
+     * @param array  $options
+     * <pre>
+     *      [
+     *          'query' => 'modulename.field_name = 'value'',
+     *          'order_by' => 'field_name',
+     *          'offset'    => '0',
+     *          'select_fields' => [
+     *              'field_name',
+     *          ],
+     *          'link_name_to_fields_array' => [
+     *              'module_related' => [
+     *                  'field_name_one',
+     *                  'field_name_two',
+     *                  'field_name_xxx',
+     *              ],
+     *          ],
+     *          'max_results' => '0',
+     *          'deleted' => '0',
+     *      ],
+     * </pre>
      *
      * @return mixed
      */
     public function getEntryList($module, array $options = [])
     {
-        // Validando las opciones del metodo
         $options = $this->validateOptionsMethodGetEntry($options);
 
-        // formulario para la solicitud del metodo get_entry_list
         $this->setFormParams([
-            'session' => $this->getSession(),
-            'module_name' => $module,
-            'query' => $options['query'],
-            'order_by' => $options['order_by'],
-            'offset' => $options['offset'],
-            'select_fields' => $options['select_fields'],
+            'session'                   => $this->getSession(),
+            'module_name'               => $module,
+            'query'                     => $options['query'],
+            'order_by'                  => $options['order_by'],
+            'offset'                    => $options['offset'],
+            'select_fields'             => $options['select_fields'],
             'link_name_to_fields_array' => $options['link_name_to_fields_array'],
-            'max_results' => $options['max_results'],
-            'deleted' => $options['deleted'],
+            'max_results'               => $options['max_results'],
+            'deleted'                   => $options['deleted'],
         ]);
 
-        // enviado la peticion del metodo get_entry_list al sugar crm con sus parametros..
         $request = Request::send('get_entry_list', $this->parameters);
 
-        // validando los errores de la solicitud.
         $this->validateErrors($request);
 
-        // transformando los valores de la respuesta de los metodos de la aplicacion.
         $data = $this->transformResponse($request);
 
         if ($data) {
             return [
                 'count' => [
                     'result_count' => $request['result_count'],
-                    'total_count' => $request['total_count'],
+                    'total_count'  => $request['total_count'],
                 ],
-                'data' => $data,
+                'data'  => $data,
             ];
         }
+
+        return [];
     }
 
     /**
-     * Recupera una lista de registros en base a las especificaciones de la consulta.
-     *
      * @param string $module
-     * @param array $data
+     * @param array  $data
      *
-     * @return mixed
+     * @return array
      */
     public function setEntries($module, array $data = [])
     {
-        // formulario para la solicitud del metodo set_entries
+        $nameValueList = $this->helpers()->requestValueMultiple($data);
+
         $this->setFormParams([
-            'session' => $this->getSession(),
-            'module_name' => $module,
-            'name_value_list' => $this->helpers()->requestValueMultiple($data),
+            'session'         => $this->getSession(),
+            'module_name'     => $module,
+            'name_value_list' => $nameValueList,
         ]);
 
-        // enviado la peticion del metodo set_entries al sugar crm con sus parametros..
         $request = Request::send('set_entries', $this->parameters);
 
-        // validando los errores de la solicitud.
         $this->validateErrors($request);
 
         return $request;
     }
 
     /**
-     * Crea un documento mediante set_entry y una revisión de documentos con el método set_document_revision
+     * Retrieves a specific relationship link for a specified record.
      *
      * @param $module
+     * @param $id
+     * @param $options
+     *
+     * @return array
+     */
+    public function getRelationships($module, $id, $options = [])
+    {
+        $options = $this->validateOptionsMethodGetEntry($options);
+
+        $this->setFormParams([
+            'session'                                  => $this->getSession(),
+            'module_name'                              => $module,
+            'module_id'                                => $id,
+            'link_field_name'                          => $options['link_field_name'],
+            'related_module_query'                     => $options['related_module_query'],
+            'related_fields'                           => $options['related_fields'],
+            'related_module_link_name_to_fields_array' => $options['related_module_link_name_to_fields_array'],
+            'deleted'                                  => $options['deleted'],
+            'order_by'                                 => $options['order_by'],
+            'offset'                                   => $options['offset'],
+            'limit'                                    => $options['limit'],
+        ]);
+
+        $request = Request::send('get_relationships', $this->parameters);
+
+        $this->validateErrors($request);
+
+        $data = $this->transformResponse($request);
+
+        return $data;
+    }
+
+    /**
+     * Sets relationships between two records. You can relate multiple records to a single record using this.
+     */
+    public function setRelationship($module, $id, $data, $options)
+    {
+        $nameValueList = $this->helpers()->requestValue($data);
+
+        $options = $this->validateOptionsMethodGetEntry($options);
+
+        $this->setFormParams([
+            'session'         => $this->getSession(),
+            'module_name'     => $module,
+            'module_id'       => $id,
+            'link_field_name' => $options['link_field_name'],
+            'related_ids'     => $options['related_ids'],
+            'name_value_list' => $nameValueList,
+            'delete'          => $options['delete'],
+        ]);
+
+        $request = Request::send('set_relationship', $this->parameters);
+
+        $this->validateErrors($request);
+
+        $data = $this->transformResponse($request);
+
+        return $data;
+    }
+
+    /**
+     * Crea un documento mediante set_entry y una revisión de documentos con el método set_document_revision
+     *
+     * @param       $module
      * @param array $data
      *
      * @return array
@@ -344,30 +397,27 @@ class SugarCrmWrapper
      */
     public function setDocument($module, array $data = [])
     {
-        // creando un registro
         $document = $this->setEntry($module, $data);
 
-        // validando los documentos
         $data = $this->validateDocuments($data);
 
-        // formulario para la solicitud del metodo set_document_revision
         $this->setFormParams([
             'session' => $this->getSession(),
-            'note' => [
-                'id' => $document['id'],
-                'file' => base64_encode(file_get_contents($data['file'])),
-                'filename' => $data['filename'],
-                'version' => $data['version'],
+            'note'    => [
+                'id'            => $document,
+                'file'          => base64_encode(file_get_contents($data['file'])),
+                'filename'      => $data['filename'],
+                'version'       => $data['version'],
+                'name'          => $data['filename'],
+                'document_name' => $data['filename'],
             ],
         ]);
 
-        // enviado la peticion del metodo set_document_revision al sugar crm con sus parametros..
         $request = Request::send('set_document_revision', $this->parameters);
 
-        // validando los errores de la solicitud.
         $this->validateErrors($request);
 
-        return $request;
+        return ['id' => $document, 'note_id' => $request];
     }
 
     /**
@@ -387,9 +437,8 @@ class SugarCrmWrapper
                     throw new SugarCrmWrapperException('Not Found Key ' . $key);
                 }
             }
-
-            return $data;
         }
+        return $data;
     }
 
     /**
@@ -400,20 +449,37 @@ class SugarCrmWrapper
      */
     private function validateOptionsMethodGetEntry(array $options = [])
     {
-        // transformando valores para las opciones de las relaciones del metodo.
-        $options['link_name_to_fields_array'] = $this->helpers()->requestValueRelations($options);
-
         $default = [
-            'query' => '',
-            'order_by' => '',
-            'offset' => 0,
-            'select_fields' => [],
-            'link_name_to_fields_array' => [],
-            'max_results' => 0,
-            'deleted' => false,
+            'query'                                    => '',
+            'order_by'                                 => '',
+            'offset'                                   => 0,
+            'select_fields'                            => [],
+            'link_name_to_fields_array'                => [],
+            'max_results'                              => 0,
+            'deleted'                                  => false,
+            'link_field_name'                          => '',
+            'related_module_query'                     => '',
+            'related_fields'                           => [],
+            'related_module_link_name_to_fields_array' => [],
+            'limit'                                    => '',
+            'delete'                                   => 0,
+            'related_ids'                              => [],
         ];
 
-        return array_merge($default, $options);
+        //agregando indices por defecto.
+        $options = array_merge($default, $options);
+
+        // transformando valores para las opciones de las relaciones del metodo.
+        $options['link_name_to_fields_array'] = $this->helpers()->requestValueRelations(
+            $options['link_name_to_fields_array']
+        );
+
+        // transformando valores para las opciones de las relaciones del metodo.
+        $options['related_module_link_name_to_fields_array'] = $this->helpers()->requestValueRelations(
+            $options['related_module_link_name_to_fields_array']
+        );
+
+        return $options;
     }
 
     /**
@@ -460,6 +526,8 @@ class SugarCrmWrapper
         if ($this->hasSession()) {
             return $this->session;
         }
+
+        return null;
     }
 
     /**
@@ -469,7 +537,7 @@ class SugarCrmWrapper
      */
     public function hasSession()
     {
-        return !is_null($this->session);
+        return !is_null($this->session) && $this->session != '';
     }
 
     /**
@@ -535,6 +603,8 @@ class SugarCrmWrapper
             $this->setErrors($request);
             throw new SugarCrmWrapperException($request['name']);
         }
+
+        return null;
     }
 
     /**
@@ -546,17 +616,16 @@ class SugarCrmWrapper
     private function transformResponse($request)
     {
         $records = [];
+
         if (isset($request['entry_list'])) {
             foreach ($request['entry_list'] as $i => $entry) {
-                //agregando registros.
                 $records[] = array_merge(
-                // tranformando los valores de la peticion.
                     $this->transformResponseValues($entry['name_value_list']),
-                    // agregando las relaciones
                     $this->setRelations($request, $i)
                 );
             }
         }
+
         return $records;
     }
 
@@ -570,7 +639,8 @@ class SugarCrmWrapper
     private function setRelations($request, $i)
     {
         $results = [];
-        //seteando las relaciones por el metodo get_entries
+
+
         if (isset($request['relationship_list'][$i]['link_list'])) {
             foreach ($request['relationship_list'][$i]['link_list'] as $module) {
                 foreach ($module['records'] as $x => $record) {
@@ -580,13 +650,13 @@ class SugarCrmWrapper
             return $results;
         }
 
-        //seteando las relaciones por el metodo get_entry
-        if (isset($request['relationship_list'][0])) {
-            foreach ($request['relationship_list'][0] as $module) {
-                foreach ($module['records'] as $x => $record) {
-                    $results[$module['name']] = $this->transformResponseValues($record);
+        if (isset($request['relationship_list'][$i]) && count($request['relationship_list'][$i]) > 0) {
+            foreach ($request['relationship_list'][$i] as $key => $module) {
+                foreach ($module['records'] as $record) {
+                    $results[$module['name']][] = $this->transformResponseValues($record);
                 }
             }
+
             return $results;
         }
 
