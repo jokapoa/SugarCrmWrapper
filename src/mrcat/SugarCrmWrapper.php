@@ -421,6 +421,26 @@ class SugarCrmWrapper
     }
 
     /**
+     * Retrieves a specific document revision.
+     *
+     * @param $id
+     * @return array
+     */
+    public function getDocument($id)
+    {
+        $this->setFormParams([
+            'session' => $this->getSession(),
+            'id'      => $id,
+        ]);
+
+        $request = Request::send('get_document_revision', $this->parameters);
+
+        $this->validateErrors($request);
+
+        return $request['document_revision'];
+    }
+
+    /**
      * Validando opciones del documento
      *
      * @param $data
